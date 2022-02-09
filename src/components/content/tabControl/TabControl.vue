@@ -31,6 +31,8 @@ export default {
   methods: {
     isActive(index){
       this.currentIndex=index;
+      // 将事件向外传 (内部传出)
+      this.$emit('tabClick', index)
     }
   },
 };

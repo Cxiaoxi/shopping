@@ -1,6 +1,10 @@
 <template>
   <div id="app">
-    <router-view></router-view>
+    <keep-alive exclude="Profile">
+      <!-- 将展示的内容放在这 -->
+      <router-view></router-view>
+    </keep-alive>
+    <!-- <router-view></router-view> -->
     <main-tab-bar></main-tab-bar>
   </div>
 </template>
