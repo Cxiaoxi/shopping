@@ -1,9 +1,9 @@
 <template>
   <div id="app">
-    <keep-alive exclude="Profile">
+    <!-- <keep-alive exclude="Profile"> -->
       <!-- 将展示的内容放在这 -->
       <router-view></router-view>
-    </keep-alive>
+    <!-- </keep-alive> -->
     <!-- <router-view></router-view> -->
     <main-tab-bar></main-tab-bar>
   </div>
