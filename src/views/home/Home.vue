@@ -3,6 +3,14 @@
     <nav-bar class="home-nav-bar">
       <div slot="center">购物</div>
     </nav-bar>
+    <!-- 固定的导航选项 显示与隐藏 -->
+    <tab-control
+      class="tab-control"
+      :titles="['流行', '新款', '精选']"
+      @tabClick="tabClick"
+      ref="tabControl2"
+      v-show="isTabFixed"
+    ></tab-control>
     <scroll
       class="centent"
       ref="scroll"
@@ -10,13 +18,17 @@
       :pull-up-load="true"
       @pullingUp="loadMore"
     >
-      <home-swiper :banners="banners"></home-swiper>
+      <home-swiper
+        :banners="banners"
+        @swiperImageLoad="swiperImageLoad"
+      ></home-swiper>
       <recommend-view :recommends="recommends"></recommend-view>
       <feature-view></feature-view>
       <tab-control
         class=""
         :titles="['流行', '新款', '精选']"
         @tabClick="tabClick"
+        ref="tabControl"
       ></tab-control>
       <goods-list :goods="showGoods"></goods-list>
       <h2>首页</h2>
@@ -39,7 +51,7 @@ import FeatureView from "./childComps/FeatureView.vue";
 
 import { getHomeMultidata, getHomeGoods } from "@/network/home";
 
-import{debounce} from "@/common/untils";
+import { debounce } from "@/common/untils";
 
 export default {
   name: "Home",
@@ -65,6 +77,8 @@ export default {
       },
       currentType: "pop",
       isShowBackTop: false,
+      tabOffsetTop: 0,
+      isTabFixed: false,
     };
   },
   // 计算属性
@@ -90,14 +104,21 @@ export default {
     // });
 
     // 防抖处理
-    const refresh =debounce(this.$refs.scroll.refresh);
+    const refresh = debounce(this.$refs.scroll.refresh);
     this.$bus.$on("itemImageLoad", () => {
       refresh();
       // console.log("2");
     });
+
+    // 赋值  获取tabControl离上面的距离
+    // 获取该组件的元素
+    // this.tabOffsetTop=this.$refs.tabControl.$el
+    // console.log(this.tabOffsetTop.offsetTop);
+    // 获取tab-control距离上面的高度 同上
+    this.swiperImageLoad();
   },
   methods: {
-    // 防抖函数 封装到untils里 
+    // 防抖函数 封装到untils里
     //   网络请求
     getHomeMultidata() {
       getHomeMultidata().then((res) => {
@@ -122,7 +143,6 @@ export default {
     // 监听事件
     //  获取
     tabClick(index) {
-      // console.log(index);
       switch (index) {
         case 0:
           this.currentType = "pop";
@@ -136,6 +156,10 @@ export default {
         default:
           break;
       }
+      // 将状态分享给隐藏的tabControl 互相分享
+      this.$refs.tabControl2.currentIndex = index;
+      this.$refs.tabControl.currentIndex = index;
+      // console.log("222");
     },
     backclick() {
       // 拿到子组件的scroll
@@ -143,13 +167,22 @@ export default {
       // 回到顶部
       this.$refs.scroll.scrollTo(0, 0, 500);
     },
-    // 显示回到顶部
+    // 显示回到顶部 接收的滚动事件
     contentScroll(position) {
-      if (position.y <= -1000) {
-        this.isShowBackTop = true;
-      } else {
-        this.isShowBackTop = false;
-      }
+      // if (position.y <= -1000) {
+      //   this.isShowBackTop = true;
+      // } else {
+      //   this.isShowBackTop = false;
+      // }
+      this.isShowBackTop = -position.y >= 1000;
+
+      // 显示或隐藏tab-control
+      this.isTabFixed = -position.y >= this.tabOffsetTop;
+    },
+    // 让tab-control在滑到固定位置时固定
+    swiperImageLoad() {
+      // 获取tab-control距离上面的高度
+      this.tabOffsetTop = this.$refs.tabControl.$el.offsetTop;
     },
     // 加载更多
     loadMore() {
@@ -172,11 +205,16 @@ export default {
 .home-nav-bar {
   background-color: var(--color-tint);
   color: #fff;
-
-  position: fixed;
+  /* 在浏览器使用原生滚动的时候才需要用 */
+  /* position: fixed;
   left: 0;
   right: 0;
   top: 0;
+  z-index: 99; */
+}
+.tab-control {
+  position: relative;
+  /* top: -1px; */
   z-index: 99;
 }
 .centent {
