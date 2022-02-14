@@ -98,7 +98,6 @@ export default {
   },
   methods: {
     // 防抖函数 封装到untils里 
-
     //   网络请求
     getHomeMultidata() {
       getHomeMultidata().then((res) => {
@@ -140,7 +139,7 @@ export default {
     },
     backclick() {
       // 拿到子组件的scroll
-      
+
       // 回到顶部
       this.$refs.scroll.scrollTo(0, 0, 500);
     },
