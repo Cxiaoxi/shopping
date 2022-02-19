@@ -9,7 +9,7 @@
           class="title-item"
           v-for="(item, index) in titles"
           :key="index"
-          @click="changeColor(index)"
+          @click="changeClick(index)"
           :class="{ active: index === currentIndex }"
         >
           {{ item }}
@@ -34,8 +34,9 @@ export default {
     };
   },
   methods: {
-    changeColor(index) {
+    changeClick(index) {
       this.currentIndex=index;
+      this.$emit("changeClick",index);
     },
     // 返回 
     backClick(){
