@@ -30,7 +30,7 @@
         @tabClick="tabClick"
         ref="tabControl"
       ></tab-control>
-      <goods-list :goods="showGoods"></goods-list>
+      <goods-list :goods="showGoods" ref="goodsList"></goods-list>
       <h2>首页</h2>
     </scroll>
     <!-- 加native可以监听组件的点击事件 -->
@@ -77,8 +77,11 @@ export default {
       },
       currentType: "pop",
       isShowBackTop: false,
+      scrollTop:0,
       tabOffsetTop: 0,
       isTabFixed: false,
+      goodsOffsetTop:0,
+      itemImgListener:null,
     };
   },
   // 计算属性
@@ -104,11 +107,12 @@ export default {
     // });
 
     // 防抖处理
-    const refresh = debounce(this.$refs.scroll.refresh);
-    this.$bus.$on("itemImageLoad", () => {
+    let refresh = debounce(this.$refs.scroll.refresh,100);
+    
+    this.itemImgListener = ()=>{
       refresh();
-      // console.log("2");
-    });
+    }
+    this.$bus.$on("itemImageLoad", this.itemImgListener);
 
     // 赋值  获取tabControl离上面的距离
     // 获取该组件的元素
@@ -116,6 +120,12 @@ export default {
     // console.log(this.tabOffsetTop.offsetTop);
     // 获取tab-control距离上面的高度 同上
     this.swiperImageLoad();
+  },
+  // 组件处于不活跃状态时触发
+  deactivated () {
+    console.log("不活跃");
+    // 取消全局事件的监听，这里的第二个参数(on对应的第二个参数)必须要传，不然这个全局事件全部取消
+    this.$bus.$off('itemImageLoad',this.itemImgListener)
   },
   methods: {
     // 防抖函数 封装到untils里
@@ -160,6 +170,7 @@ export default {
       this.$refs.tabControl2.currentIndex = index;
       this.$refs.tabControl.currentIndex = index;
       // console.log("222");
+      this.changeGoodsScroll();
     },
     backclick() {
       // 拿到子组件的scroll
@@ -174,6 +185,7 @@ export default {
       // } else {
       //   this.isShowBackTop = false;
       // }
+      this.scrollTop = -position.y;
       this.isShowBackTop = -position.y >= 1000;
 
       // 显示或隐藏tab-control
@@ -183,6 +195,16 @@ export default {
     swiperImageLoad() {
       // 获取tab-control距离上面的高度
       this.tabOffsetTop = this.$refs.tabControl.$el.offsetTop;
+    },
+    // 切换goodsList后回到上面
+    changeGoodsScroll(){
+      this.goodsOffsetTop = this.$refs.goodsList.$el.offsetTop-44;
+      // console.log(this.goodsOffsetTop);
+      // 回到第一行数据
+      if(this.scrollTop>this.goodsOffsetTop){
+        this.$refs.scroll.scrollTo(0, -this.goodsOffsetTop,0)
+      }
+      
     },
     // 加载更多
     loadMore() {
