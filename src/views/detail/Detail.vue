@@ -1,7 +1,8 @@
 <template>
   <div id="detail">
-    <detail-nav-bar @changeClick="changeClick"> </detail-nav-bar>
-    <scroll class="center" ref="scroll">
+    <detail-nav-bar class="detail-nav" ref="nav" @changeClick="changeClick">
+    </detail-nav-bar>
+    <scroll class="center" ref="scroll" @scroll="detailScroll" :probeType="3">
       <detail-swiper :topImages="topImages"></detail-swiper>
       <detail-base-info :goods="goods"></detail-base-info>
       <detail-shop-info :shop="shop"></detail-shop-info>
@@ -17,8 +18,10 @@
         ref="comment"
         :commentInfo="commentInfo"
       ></detail-comment-info>
-      <goods-list ref="recommend" :goods="recommends"></goods-list>
+      <goods-list ref="recommend" :goods="recommends" />
     </scroll>
+    <detail-bottom-bar @addToCart="addToCart" />
+    <back-top @click.native="backclick" v-show="this.isShowBackTop"></back-top>
   </div>
 </template>
 
@@ -30,8 +33,10 @@ import DetailShopInfo from "./childComps/DetailShopInfo";
 import DetailGoodsInfo from "./childComps/DetailGoodsInfo";
 import DetailParamInfo from "./childComps/DetailParamInfo";
 import DetailCommentInfo from "./childComps/DetailCommentInfo.vue";
+import DetailBottomBar from "./childComps/DetailBottomBar.vue";
 
 import GoodsList from "@/components/content/goods/GoodsList";
+import BackTop from "@/components/content/backTop/BackTop";
 
 import Scroll from "@/components/common/scroll/Scroll";
 
@@ -57,8 +62,10 @@ export default {
     DetailGoodsInfo,
     DetailParamInfo,
     DetailCommentInfo,
+    DetailBottomBar,
     Scroll,
     GoodsList,
+    BackTop,
   },
   data() {
     return {
@@ -73,6 +80,12 @@ export default {
       itemImgListener: null,
       // 需要回到位置时y值
       themeTopYs: [],
+      // 赋距离的函数
+      getThemeTopY: null,
+      // 可以通过该方式获取到navbar中得currentIndex  this.$refs.nav.currentIndex
+      // navBarIndex:0,
+      currentIndex: 0,
+      isShowBackTop: false,
     };
   },
   // 混入 , 将共同的代码混入进vue实例
@@ -123,9 +136,9 @@ export default {
       // console.log(this.themeTopYs);
 
       // this.$nextTick(() => {
-        // 更具最新的数据,对应的dom时已经被加载出来的
-        // 图片的高度还没被计算出来所有还是错误的 
-        // offsetTop值不对的时候基本都是图片的问题
+      // 更具最新的数据,对应的dom时已经被加载出来的
+      // 图片的高度还没被计算出来所有还是错误的
+      // offsetTop值不对的时候基本都是图片的问题
       //   this.themeTopYs = [];
 
       //   this.themeTopYs.push(0);
@@ -142,6 +155,20 @@ export default {
       // console.log(res.data.list);
       this.recommends = res.data.list;
     });
+
+    // 获取各组件的scrollY位置 给this.themeTopYs赋值进行防抖
+    this.getThemeTopY = debounce(() => {
+      // 赋距离的值
+      this.themeTopYs = [];
+      this.themeTopYs.push(0);
+      this.themeTopYs.push(this.$refs.params.$el.offsetTop);
+      this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
+      this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
+      // Number.MAX_VALUE为最大值，给到数组里该值就是最大
+      this.themeTopYs.push(Number.MAX_VALUE);
+
+      // console.log(this.$refs.scroll);
+    }, 100);
   },
   // destroyed () {
   //   console.log("111")
@@ -167,35 +194,106 @@ export default {
       this.$refs.scroll.refresh();
 
       // 赋距离的值
-      this.themeTopYs = [];
-      this.themeTopYs.push(0);
-      this.themeTopYs.push(this.$refs.params.$el.offsetTop);
-      this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
-      this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
-
-      console.log(this.themeTopYs);
+      this.getThemeTopY();
     },
 
     // 根据对应标题到达指定位置
     changeClick(index) {
-      console.log(index);
-      console.log(-this.themeTopYs[index]);
+      // console.log(index);
+      // console.log(-this.themeTopYs[index]);
+      this.navBarIndex = index;
       this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 100);
     },
+    // 根据滑动位置改变标题的class（计算得到哪个class）
+    detailScroll(position) {
+      // if(-position.y<this.themeTopYs[1]){
+      //   this.$refs.nav.currentIndex=0;
+      // }else if(-position.y<this.themeTopYs[2]){
+      //   this.$refs.nav.currentIndex=1;
+      // }else if(-position.y<this.themeTopYs[3]){
+      //   this.$refs.nav.currentIndex=2;
+      // }else{
+      //   this.$refs.nav.currentIndex=3;
+      // }
+      // console.log(this.navBarIndex);
+      // console.log(this.$refs.nav.currentIndex);
+      let positionY = -position.y;
+      // 因为加了一个最大值
+      let length = this.themeTopYs.length;
+      for (let i = 0; i < length; i++) {
+        if (
+          this.currentIndex !== i &&
+          i < length - 1 &&
+          positionY > this.themeTopYs[i] &&
+          positionY < this.themeTopYs[i + 1]
+        ) {
+          this.currentIndex = i;
+          this.$refs.nav.currentIndex = i;
+          // console.log(this.$refs.nav.currentIndex);
+        }
+      }
+
+      // 隐藏/显示backTop
+      if (positionY > 2000) {
+        this.isShowBackTop = true;
+      } else {
+        this.isShowBackTop = false;
+      }
+    },
+    // 回到顶部
+    backclick() {
+      // console.log("11");
+      this.$refs.scroll.scrollTo(0, 0, 100);
+    },
+    // 添加购物车
+    addToCart() {
+      // 获取需要的信息
+      const produck = {};
+      produck.image = this.topImages[0];
+      produck.title = this.goods.title;
+      produck.desc = this.goods.desc;
+      produck.price = this.goods.realPrice;
+      produck.id = this.iid;
+      // produck.arr=[1,2,3,4,5];
+      // produck.count=0;
+      // produck.co=this.iid;
+      // console.log(produck);
+
+      // 将信息添加到购物车里
+      // this.$store.cartList.push(product)
+      // 通过commit  提交  传入方法的名字  可带一个参数传入
+      // this.$store.commit('increment')
+      // this.$store.commit("addCart", produck);
+      // console.log(this.$store.dispatch);
+      // 对异步事件 在store action处理 分发dispatch
+      this.$store.dispatch("addCart", produck);
+    },
+
+    // console.log(this.$store.state.cartList);
+    // console.log(typeof(this.$store.state.cartList[0].count));
   },
 };
 </script>
 
 <style scoped>
-.detail {
+#detail {
+  position: relative;
+  z-index: 9;
+  background-color: #fff;
   height: 100vh;
 }
+.detail-nav {
+  position: relative;
+  z-index: 9;
+  background-color: #fff;
+}
 .center {
-  position: absolute;
+  /* position: absolute;
   top: 44px;
-  bottom: 49px;
+  bottom: 0px;
   left: 0;
-  right: 0;
+  right: 0; */
   overflow: hidden;
+  height: calc(100% - 102px);
 }
 </style>

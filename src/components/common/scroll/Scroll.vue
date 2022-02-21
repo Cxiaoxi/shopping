@@ -15,7 +15,7 @@ export default {
   props: {
     probeType: {
       type: Number,
-      default: 2,
+      default: 0,
     },
     pullUpLoad: {
       type: Boolean,

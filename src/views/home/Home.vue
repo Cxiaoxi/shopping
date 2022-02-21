@@ -198,7 +198,7 @@ export default {
     },
     // 切换goodsList后回到上面
     changeGoodsScroll(){
-      this.goodsOffsetTop = this.$refs.goodsList.$el.offsetTop-44;
+      this.goodsOffsetTop = this.$refs.goodsList.$el.offsetTop;
       // console.log(this.goodsOffsetTop);
       // 回到第一行数据
       if(this.scrollTop>this.goodsOffsetTop){
@@ -222,7 +222,7 @@ export default {
 #home {
   /* padding-top: 44px; */
   height: 100vh;
-  position: relative;
+  /* position: relative; */
 }
 .home-nav-bar {
   background-color: var(--color-tint);

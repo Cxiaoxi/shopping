@@ -5,12 +5,13 @@
         <img class="image" src="~@/assets/img/common/back.svg" alt="">
       </div>
       <div slot="center" class="title">
+        <!-- :class="{ active: navBarIndex>-1 ? navBarIndex === index :  index === currentIndex }" -->
         <div
           class="title-item"
           v-for="(item, index) in titles"
           :key="index"
           @click="changeClick(index)"
-          :class="{ active: index === currentIndex }"
+          :class="{ active:index === currentIndex }"
         >
           {{ item }}
         </div>
@@ -27,6 +28,15 @@ export default {
   components: {
     NavBar,
   },
+  // props: {
+  //   navBarIndex:{
+  //     type:Number,
+  //     default(){
+  //       // 为-1就不需要scroll联动标题
+  //       return -1;
+  //     }
+  //   }
+  // },
   data() {
     return {
       titles: ["商品", "参数", "评论", "推荐"],
