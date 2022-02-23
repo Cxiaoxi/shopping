@@ -22,6 +22,8 @@
     </scroll>
     <detail-bottom-bar @addToCart="addToCart" />
     <back-top @click.native="backclick" v-show="this.isShowBackTop"></back-top>
+    <!-- 后面通过自定义$toast实现 -->
+    <!-- <Toast :isShow="isShowToast" :message="message"></Toast> -->
   </div>
 </template>
 
@@ -40,6 +42,8 @@ import BackTop from "@/components/content/backTop/BackTop";
 
 import Scroll from "@/components/common/scroll/Scroll";
 
+// import Toast from "@/components/common/toast/Toast.vue";
+
 // import itemListenerMixin from "@/common/mixin"
 
 import {
@@ -52,9 +56,12 @@ import {
 
 import { debounce } from "@/common/untils";
 
+import { mapActions } from "vuex";
+
 export default {
   name: "Detail",
   components: {
+    // Toast,
     DetailNavBar,
     DetailSwiper,
     DetailBaseInfo,
@@ -86,6 +93,10 @@ export default {
       // navBarIndex:0,
       currentIndex: 0,
       isShowBackTop: false,
+      // // 显示toast
+      // isShowToast: 0,
+      // // toast的文本
+      // message:'text'
     };
   },
   // 混入 , 将共同的代码混入进vue实例
@@ -189,6 +200,8 @@ export default {
     this.$bus.$off("itemImageLoad", this.itemImgListener);
   },
   methods: {
+    //引入vuex中的Actions的addCart函数
+    ...mapActions(["addCart"]),
     // 图片加载完后刷新滚动条
     imageLoad() {
       this.$refs.scroll.refresh();
@@ -248,12 +261,12 @@ export default {
     // 添加购物车
     addToCart() {
       // 获取需要的信息
-      const produck = {};
-      produck.image = this.topImages[0];
-      produck.title = this.goods.title;
-      produck.desc = this.goods.desc;
-      produck.price = this.goods.realPrice;
-      produck.id = this.iid;
+      const product = {};
+      product.image = this.topImages[0];
+      product.title = this.goods.title;
+      product.desc = this.goods.desc;
+      product.price = this.goods.realPrice;
+      product.id = this.iid;
       // produck.arr=[1,2,3,4,5];
       // produck.count=0;
       // produck.co=this.iid;
@@ -266,7 +279,21 @@ export default {
       // this.$store.commit("addCart", produck);
       // console.log(this.$store.dispatch);
       // 对异步事件 在store action处理 分发dispatch
-      this.$store.dispatch("addCart", produck);
+
+      // 因为引入了mapActions
+      // this.$store.dispatch("addCart", product).then((res) => {
+      //   console.log(res);
+      // });
+      this.addCart(product).then((res) => {
+        console.log(res);
+
+        // 加入购物车后显示提示 一秒后消失 改自定义插件Toast
+        // this.isShowToast = 1;
+        // setTimeout(() => {
+        //   this.isShowToast = 0;
+        // }, 1000);
+        this.$toast.toastShowClick(res, 1000);
+      });
     },
 
     // console.log(this.$store.state.cartList);

@@ -21,6 +21,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    observeImage:{
+      type: Boolean,
+      default: false,
+    }
   },
   data() {
     return {
@@ -44,6 +48,9 @@ export default {
       click: true,
       // 上拉加载
       pullUpLoad: this.pullUpLoad,
+      // 开启对 wrapper 子元素中图片元素的加载的探测。无论图片的加载成功与否，都会自动调用 
+      // BetterScroll 的 refresh 方法来重新计算可滚动的宽度或者高度，新增于 v2.1.0 版本。
+      observeImage: this.observeImage // 开启 observe-image 插件
     });
     // 监听滚动的位置
     this.scroll.on("scroll", (position) => {

@@ -1,6 +1,6 @@
 <template>
   <div class="goods-item" @click="itemClick">
-    <img :src="showImage" alt="" @load="imageLoad" />
+      <img :src="showImage" alt="" @load="imageLoad" />
     <div class="goods-info">
       <p>{{ goodsItem.title }}</p>
       <span class="price">{{ goodsItem.price }}</span>
@@ -49,8 +49,10 @@ export default {
 <style scoped>
 .goods-item {
   width: 48vw;
+  display: flex;
+  flex-direction:column;
+  justify-content: space-between;
   /* padding-bottom: 40px; */
-  /* height: 200px; */
 }
 .goods-item img {
   width: 100%;
@@ -65,6 +67,7 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
   margin-bottom: 3px;
+  margin-top: 3px;
 }
 .price {
   color: var(--color-high-text);

@@ -15,7 +15,7 @@
       class="centent"
       ref="scroll"
       @scroll="contentScroll"
-      :pull-up-load="true"
+      :pullUpLoad="true"
       @pullingUp="loadMore"
     >
       <home-swiper

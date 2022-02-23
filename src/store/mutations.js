@@ -4,8 +4,10 @@ export default {
     payload.count++;
     // console.log(payload);
   },
+  // 添加商品
   addToCart(state,payload){
-    state.cartList.push(payload)
+    payload.checked=true;
+    state.cartList.push(payload);
     // console.log(payload);
   }
 }
