@@ -20,7 +20,7 @@
       ></detail-comment-info>
       <goods-list ref="recommend" :goods="recommends" />
     </scroll>
-    <detail-bottom-bar @addToCart="addToCart" />
+    <DetailBottomBar @addToCart="addToCart" />
     <back-top @click.native="backclick" v-show="this.isShowBackTop"></back-top>
     <!-- 后面通过自定义$toast实现 -->
     <!-- <Toast :isShow="isShowToast" :message="message"></Toast> -->

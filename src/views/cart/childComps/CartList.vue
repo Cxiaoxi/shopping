@@ -23,6 +23,7 @@ export default {
   },
   activated() {
     // 调用刷新scroll的center高度
+    // console.log("111");
     this.$refs.scroll.refresh();
   },
   methods: {

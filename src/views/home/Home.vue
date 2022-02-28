@@ -121,6 +121,16 @@ export default {
     // 获取tab-control距离上面的高度 同上
     this.swiperImageLoad();
   },
+  activated () {
+    this.$refs.scroll.refresh()
+    // 防抖处理
+    let refresh = debounce(this.$refs.scroll.refresh,100);
+    
+    this.itemImgListener = ()=>{
+      refresh();
+    }
+    this.$bus.$on("itemImageLoad", this.itemImgListener);
+  },
   // 组件处于不活跃状态时触发
   deactivated () {
     console.log("不活跃");
